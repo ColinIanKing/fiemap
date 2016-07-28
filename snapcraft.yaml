@@ -1,0 +1,19 @@
+name: fiemap
+version: 0.0.1
+summary: file extent dumping tool
+description: fiemap dumps the extents of files allowing one to see how much fragmentation is in a file
+
+confinement: strict
+
+parts:
+    fiemap:
+        plugin: make
+        source: .
+        build-packages:
+            - gcc
+            - make
+apps:
+    fiemap:
+        command: usr/bin/fiemap
+        plugs: [home]
+
