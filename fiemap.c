@@ -43,7 +43,7 @@ void syntax(char **argv)
 
 struct fiemap *read_fiemap(int fd)
 {
-	struct fiemap *fiemap;
+	struct fiemap *fiemap, *tmp;
 	int extents_size;
 
 	if ((fiemap = (struct fiemap*)malloc(sizeof(struct fiemap))) == NULL) {
@@ -61,6 +61,7 @@ struct fiemap *read_fiemap(int fd)
 	/* Find out how many extents there are */
 	if (ioctl(fd, FS_IOC_FIEMAP, fiemap) < 0) {
 		fprintf(stderr, "fiemap ioctl() failed\n");
+		free(fiemap);
 		return NULL;
 	}
 
@@ -69,11 +70,14 @@ struct fiemap *read_fiemap(int fd)
                               (fiemap->fm_mapped_extents);
 
 	/* Resize fiemap to allow us to read in the extents */
-	if ((fiemap = (struct fiemap*)realloc(fiemap,sizeof(struct fiemap) +
-                                         extents_size)) == NULL) {
+	tmp = (struct fiemap *)realloc(fiemap,sizeof(struct fiemap) +
+                                       extents_size);
+	if (!tmp) {
 		fprintf(stderr, "Out of memory allocating fiemap\n");
+		free(fiemap);
 		return NULL;
 	}
+	fiemap = tmp;
 
 	memset(fiemap->fm_extents, 0, extents_size);
 	fiemap->fm_extent_count = fiemap->fm_mapped_extents;
@@ -81,6 +85,7 @@ struct fiemap *read_fiemap(int fd)
 
 	if (ioctl(fd, FS_IOC_FIEMAP, fiemap) < 0) {
 		fprintf(stderr, "fiemap ioctl() failed\n");
+		free(fiemap);
 		return NULL;
 	}
 
