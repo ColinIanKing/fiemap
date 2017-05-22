@@ -19,15 +19,19 @@
 
 /*
  *  Author Colin Ian King,  colin.king@canonical.com
+ *
+ *  Add support of multi-chunk fiemaps. Oleksandr Suvorov, cryosay@gmail.com
  */
 
 
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -45,6 +49,15 @@ struct fiemap *read_fiemap(int fd)
 {
 	struct fiemap *fiemap, *tmp;
 	int extents_size;
+	struct stat statinfo;
+	__u64 fiemap_length;
+
+	if (fstat(fd, &statinfo)) {
+		fprintf(stderr, "Can't determine file size [%d] (%s)\n",
+				errno, strerror(errno));
+		return NULL;
+	}
+	fiemap_length = statinfo.st_size;
 
 	if ((fiemap = (struct fiemap*)malloc(sizeof(struct fiemap))) == NULL) {
 		fprintf(stderr, "Out of memory allocating fiemap\n");
@@ -53,7 +66,7 @@ struct fiemap *read_fiemap(int fd)
 	memset(fiemap, 0, sizeof(struct fiemap));
 
 	fiemap->fm_start = 0;
-	fiemap->fm_length = ~0;		/* Lazy */
+	fiemap->fm_length = fiemap_length;
 	fiemap->fm_flags = 0;
 	fiemap->fm_extent_count = 0;
 	fiemap->fm_mapped_extents = 0;
