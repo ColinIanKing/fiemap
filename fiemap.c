@@ -78,8 +78,6 @@ struct fiemap *read_fiemap(int fd)
 	 *  of the last extent
 	 */
 	while (fiemap_start < fiemap_length) {
-		fprintf(stderr, "DEBUG: %llu -> %llu\n", fiemap_start, fiemap_length);
-
 		memset(fiemap, 0, sizeof(struct fiemap));
 
 		fiemap->fm_start = fiemap_start;
