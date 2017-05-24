@@ -54,7 +54,7 @@ struct fiemap *read_fiemap(int fd)
 	__u64 fiemap_start = 0, fiemap_length;
 
 	if (fstat(fd, &statinfo) != 0) {
-		fprintf(stderr, "Can't determine file size [%d] (%s)\n",
+		fprintf(stderr, "Cannot determine file size, errno=%d (%s)\n",
 				errno, strerror(errno));
 		return NULL;
 	}
@@ -86,7 +86,8 @@ struct fiemap *read_fiemap(int fd)
 
 		/* Find out how many extents there are */
 		if (ioctl(fd, FS_IOC_FIEMAP, fiemap) < 0) {
-			fprintf(stderr, "fiemap ioctl() failed\n");
+			fprintf(stderr, "fiemap ioctl() FS_IOC_FIEMAP failed, errno=%d (%s)\n",
+				errno, strerror(errno));
 			goto fail_cleanup;
 		}
 
@@ -104,7 +105,7 @@ struct fiemap *read_fiemap(int fd)
 		fm_tmp = realloc(fiemap,
 				 sizeof(struct fiemap) + extents_size);
 		if (!fm_tmp) {
-			fprintf(stderr, "Out of memory allocating fiemap\n");
+			fprintf(stderr, "Out of memory reallocating fiemap\n");
 			goto fail_cleanup;
 		}
 		fiemap = fm_tmp;
@@ -114,7 +115,8 @@ struct fiemap *read_fiemap(int fd)
 		fiemap->fm_mapped_extents = 0;
 
 		if (ioctl(fd, FS_IOC_FIEMAP, fiemap) < 0) {
-			fprintf(stderr, "fiemap ioctl() failed\n");
+			fprintf(stderr, "fiemap ioctl() FS_IOC_FIEMAP failed, errno=%d (%s)\n",
+				errno, strerror(errno));
 			goto fail_cleanup;
 		}
 
@@ -196,7 +198,8 @@ int main(int argc, char **argv)
 		int fd;
 
 		if ((fd = open(argv[i], O_RDONLY)) < 0) {
-			fprintf(stderr, "Cannot open file %s\n", argv[i]);
+			fprintf(stderr, "Cannot open file %s, errno=%d (%s)\n",
+				argv[i], errno, strerror(errno));
 		}
 		else {
 			struct fiemap *fiemap;
