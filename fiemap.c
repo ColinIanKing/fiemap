@@ -94,8 +94,7 @@ struct fiemap *read_fiemap(int fd)
 		if (fiemap->fm_mapped_extents == 0)
 			break;
 
-		/* Result fiemap have to hold all the extents for the hole file
-		 */
+		/* Result fiemap have to hold all the extents for the hole file */
 
 		/* Read in the extents */
 		extents_size = sizeof(struct fiemap_extent) *
@@ -139,14 +138,16 @@ struct fiemap *read_fiemap(int fd)
 
 		result_extents += fiemap->fm_mapped_extents;
 
-		fiemap_start = fiemap->fm_extents[fiemap->fm_mapped_extents -
-						  1].fe_logical +
-			       fiemap->fm_extents[fiemap->fm_mapped_extents -
-						  1].fe_length;
+		/* Highly unlikely that it is zero */
+		if (fiemap->fm_mapped_extents) {
+			const __u32 i = fiemap->fm_mapped_extents - 1;
 
-		if (fiemap->fm_extents[fiemap->fm_mapped_extents - 1].fe_flags &
-		    FIEMAP_EXTENT_LAST)
-			break;
+			fiemap_start = fiemap->fm_extents[i].fe_logical +
+				       fiemap->fm_extents[i].fe_length;
+
+			if (fiemap->fm_extents[i].fe_flags & FIEMAP_EXTENT_LAST)
+				break;
+		}
 	}
 
 	result_fiemap->fm_mapped_extents = result_extents;
