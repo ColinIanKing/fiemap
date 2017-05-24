@@ -23,8 +23,6 @@
  *  Add support of multi-chunk fiemaps. Oleksandr Suvorov, cryosay@gmail.com
  */
 
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
