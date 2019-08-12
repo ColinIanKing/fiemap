@@ -1,5 +1,7 @@
 name: fiemap
-version: 0.0.1
+version: git
+version-script: |
+    echo $(git describe --tags)
 summary: file extent dumping tool
 description: fiemap dumps the extents of files allowing one to see how much fragmentation is in a file
 
@@ -8,7 +10,7 @@ confinement: strict
 parts:
     fiemap:
         plugin: make
-        source: .
+        source: git://github.com/ColinIanKing/fiemap
         build-packages:
             - gcc
             - make
